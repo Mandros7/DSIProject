@@ -10,12 +10,12 @@ Regulador::Regulador(VComp* entrada, VComp* salida, VComp* salidasTabla, double*
 
 double Regulador::read() {
     short value = sens->getValue();
-    pthread_mutex_t *m = conv->getMutex();
-    pthread_cond_t *finished = conv->getFinishCond();
-    pthread_mutex_lock(m);
+    pthread_mutex_t m = conv->getMutex();
+    pthread_cond_t finished = conv->getFinishCond();
+    pthread_mutex_lock(&m);
     double reg = conv->getRegistroControl();
     while(reg>0) {
-        pthread_cond_wait(finished,m);
+        pthread_cond_wait(&finished,&m);
         double reg = conv->getRegistroControl();
     }
 
@@ -24,8 +24,8 @@ double Regulador::read() {
     // Otra espera condicionada aqui?
     double salida = conv->getRegistroDatos();
     conv->setRegistroControl(0);
-    pthread_cond_signal(finished);
-    pthread_mutex_unlock(m);
+    pthread_cond_signal(&finished);
+    pthread_mutex_unlock(&m);
 
 
     return (m_entrada->getValor()[0] - salida);

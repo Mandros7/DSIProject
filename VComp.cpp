@@ -1,9 +1,10 @@
 #include "VComp.h"
+#include "stdio.h"
 
 VComp::VComp(double *valor_inicial, int length) {
     valor = valor_inicial;
     m_length = length;
-    pthread_mutex_init(mutex, NULL);
+    pthread_mutex_init(&mutex, NULL);
 }
 
 double* VComp::getValor() {   
@@ -15,7 +16,7 @@ int VComp::getLength(){
 }
 
 void VComp::setValor(double* n_Valor) {
-    pthread_mutex_lock(mutex);
+    pthread_mutex_lock(&mutex);
     valor = n_Valor;
-    pthread_mutex_unlock(mutex);
+    pthread_mutex_unlock(&mutex);
 }

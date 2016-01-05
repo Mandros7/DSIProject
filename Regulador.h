@@ -5,7 +5,7 @@
 #include "Sensor.h"
 #include "Conversor.h"
 
-class Regulador : FDT {
+class Regulador : public FDT {
 
 private:
     Sensor *sens;

@@ -13,21 +13,21 @@ void Conversor::setRegistroControl(double channel) {
 }
 
 
-pthread_mutex_t* Conversor::getMutex() {
+pthread_mutex_t Conversor::getMutex() {
     return mutex;
 }
 
-pthread_cond_t* Conversor::getFinishCond() {
+pthread_cond_t Conversor::getFinishCond() {
     return cond;
 }
 
 void Conversor::convert(short sensValor) {
-    registroDatos = (double)sensValor*1000.0/500.0/4096.0*10.0;;
+    registroDatos = (double)(sensValor*1000.0/500.0/4095.0*10.0);
 }
 
 Conversor::Conversor() {
-    pthread_mutex_init(mutex, NULL);
-    pthread_cond_init(cond, NULL);
+    pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&cond, NULL);
     registroDatos = 0;
     registroControl = 0;
 }

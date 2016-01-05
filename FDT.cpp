@@ -20,6 +20,7 @@ double FDT::simular(double n_entrada) {
     desplazarTabla(m_xk,n_entrada);
     desplazarTabla(m_yk,0);
     m_yk[0] = productoEscalar(m_xk,m_coefNum) - productoEscalar(m_yk,m_coefDen);
+    m_salida->setValor(&m_yk[0]);
     return m_yk[0];
 }
 

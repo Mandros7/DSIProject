@@ -5,7 +5,7 @@
 class VComp {
 
 private:
-    pthread_mutex_t *mutex;
+    pthread_mutex_t mutex;
     double* valor;
     int m_length;
 

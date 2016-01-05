@@ -10,5 +10,5 @@ short Sensor::getValue() {
         valor = 20;
     if (valor<0)
         valor = 0;
-    return (short)valor/1000.0*500.0*4095.0/10.0;
+    return (short)(valor/1000.0*500.0*4095.0/10.0);
 }

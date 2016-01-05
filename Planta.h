@@ -2,7 +2,7 @@
 #define PLANTA_H
 
 #include "FDT.h"
-class Planta : FDT {
+class Planta : public FDT {
 public:
 	double read();
 
