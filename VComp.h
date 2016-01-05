@@ -1,13 +1,21 @@
+#ifndef VCOMP_H
+#define VCOMP_H
+
+#include <pthread.h>
 class VComp {
 
 private:
-	Mutex mutex;
-	double* valor;
+    pthread_mutex_t *mutex;
+    double* valor;
+    int m_length;
 
 public:
-	VComp(int double_valor_inicial);
+    VComp(double *valor_inicial, int length);
 
 	double* getValor();
+    int getLength();
 
 	void setValor(double* n_Valor);
 };
+
+#endif //VCOMP_H

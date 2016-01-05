@@ -1,10 +1,16 @@
+#ifndef SENSOR_H
+#define SENSOR_H
+
+#include "VComp.h"
 class Sensor {
 
 private:
-	VComp entrada;
+    VComp* m_entrada;
 
 public:
-	Sensor(VComp* entrada);
+    Sensor(VComp* entrada);
 
-	short getValue();
+    short getValue();
 };
+
+#endif // SENSOR_H

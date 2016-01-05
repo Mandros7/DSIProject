@@ -1,14 +1,21 @@
 #include "VComp.h"
 
-VComp::VComp(int double_valor_inicial) {
-	// TODO - implement VComp::VComp
-	throw "Not yet implemented";
+VComp::VComp(double *valor_inicial, int length) {
+    valor = valor_inicial;
+    m_length = length;
+    pthread_mutex_init(mutex, NULL);
 }
 
-double* VComp::getValor() {
-	return this->valor;
+double* VComp::getValor() {   
+    return valor;
+}
+
+int VComp::getLength(){
+    return m_length;
 }
 
 void VComp::setValor(double* n_Valor) {
-	this->valor = n_Valor;
+    pthread_mutex_lock(mutex);
+    valor = n_Valor;
+    pthread_mutex_unlock(mutex);
 }
