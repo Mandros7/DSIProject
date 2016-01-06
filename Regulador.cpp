@@ -13,6 +13,7 @@ Regulador::Regulador(VComp* kp, VComp* entrada, VComp* salida, double* coefNum,
 }
 
 double Regulador::read() {
+    //cout<<"Regulador: "<<chan<<endl;
     short value = sens->getValue(); //Valor del sensor
 
     pthread_mutex_lock(&conv->mutex); //Obtenemos recurso

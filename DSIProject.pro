@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     Regulador.cpp \
     Sensor.cpp \
     VComp.cpp \
-    FDT.cpp
+    FDT.cpp \
+    vcomptabla.cpp
 
 HEADERS  += gui.h \
     Conversor.h \
@@ -27,6 +28,7 @@ HEADERS  += gui.h \
     Regulador.h \
     Sensor.h \
     VComp.h \
-    FDT.h
+    FDT.h \
+    vcomptabla.h
 
 FORMS    += gui.ui
