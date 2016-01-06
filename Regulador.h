@@ -13,7 +13,7 @@ private:
     int chan;
 
 public:
-    Regulador(VComp* entrada, VComp* salida, VComp* salidasTabla, double* coefNum,
+    Regulador(VComp* kp,VComp* entrada, VComp* salida, double* coefNum,
               double* coefDen, int tam, Conversor* c, Sensor *s, int channel);
 
 	double read();

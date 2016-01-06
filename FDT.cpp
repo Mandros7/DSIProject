@@ -1,9 +1,9 @@
 #include "FDT.h"
 
-FDT::FDT(VComp* entrada, VComp* salida, VComp* salidasTabla, double* coefNum, double* coefDen, int tam) {
+FDT::FDT(VComp* kp,VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam) {
     m_entrada = entrada;
     m_salida = salida;
-    m_salidasTabla = salidasTabla;
+    m_kp = kp;
     m_coefNum = coefNum;
     m_coefDen = coefDen;
     m_tam = tam;
@@ -16,11 +16,19 @@ FDT::FDT(VComp* entrada, VComp* salida, VComp* salidasTabla, double* coefNum, do
     }
 }
 
+double* FDT::aplicarGanancia(double valor,double* v){
+    double * vec = v;
+    for (int i=0;i<m_tam;i++){
+        vec[i] = vec[i]*valor;
+    }
+    return vec;
+}
+
 double FDT::simular(double n_entrada) {
     desplazarTabla(m_xk,n_entrada);
     desplazarTabla(m_yk,0);
-    m_yk[0] = productoEscalar(m_xk,m_coefNum) - productoEscalar(m_yk,m_coefDen);
-    m_salida->setValor(&m_yk[0]);
+    m_yk[0] = productoEscalar(m_xk,aplicarGanancia(m_kp->getValor(),m_coefNum)) - productoEscalar(m_yk,m_coefDen);
+    m_salida->setValor(m_yk[0]);
     return m_yk[0];
 }
 

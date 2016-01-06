@@ -10,16 +10,15 @@ class Conversor {
 private:
     double registroDatos;
     double registroControl;
-    pthread_mutex_t mutex;
-    pthread_cond_t cond;
+
 
 public:
     double getRegistroDatos();
     double getRegistroControl();
     void setRegistroControl(double channel);
     void convert(short sensValor);
-    pthread_mutex_t getMutex();
-    pthread_cond_t getFinishCond();
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
     Conversor();
 };
 

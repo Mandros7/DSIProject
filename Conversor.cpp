@@ -1,27 +1,19 @@
 #include "Conversor.h"
 
 double Conversor::getRegistroDatos() {
-    return registroDatos;
+    return this->registroDatos;
 }
 
 double Conversor::getRegistroControl() {
-    return registroControl;
+    return this->registroControl;
 }
 
 void Conversor::setRegistroControl(double channel) {
     registroControl = channel;
 }
 
-
-pthread_mutex_t Conversor::getMutex() {
-    return mutex;
-}
-
-pthread_cond_t Conversor::getFinishCond() {
-    return cond;
-}
-
 void Conversor::convert(short sensValor) {
+    //usleep(10000);
     registroDatos = (double)(sensValor*1000.0/500.0/4095.0*10.0);
 }
 

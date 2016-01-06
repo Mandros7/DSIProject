@@ -6,7 +6,7 @@ class Planta : public FDT {
 public:
 	double read();
 
-    Planta(VComp* entrada, VComp* salida, VComp* salidasTabla, double* coefNum, double* coefDen, int tam);
+    Planta(VComp* kp,VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam);
 };
 
 #endif //PLANTA_H

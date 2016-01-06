@@ -15,7 +15,7 @@ void * planta (void * param){
         double entrada = planta->read();
         double salida = planta->simular(entrada);
         cout << "Planta|\tEntrada: "<<entrada<<".\tSalida: " <<salida<< endl;
-        usleep(100000);
+        usleep(1000000);
     }
 
     return 0;
@@ -26,8 +26,8 @@ void * regulador (void * param){
     while(1){
         double entrada = regulador->read();
         double salida = regulador->simular(entrada);
-        //cout << "Regulador|\tEntrada: "<<entrada<<".\tSalida: " <<salida<< endl;
-        usleep(100000);
+        cout << "Regulador|\tEntrada: "<<entrada<<".\tSalida: " <<salida<< endl;
+        usleep(1000000);
     }
     return 0;
 }
@@ -53,32 +53,36 @@ int main(int argc, char *argv[])
                         0.82,
                         -1,
                        -0.82};
-    int tam = 5;
-    double *ykTablaValor = new double[tam];
-    double *ukTablaValor = new double[tam];
-    double *ukValor = new double[1];
-    ukValor[0] = 0;
-    double *ykValor = new double[1];
-    ykValor[0] = 0;
-    double *refValor = new double[1];
-    refValor[0] = 10;
-    VComp uk = VComp(ukValor,1);
-    VComp yk = VComp(ykValor,1);
-    VComp ref = VComp(refValor,1);
-    VComp ykTabla = VComp(ykTablaValor,tam);
-    VComp ukTabla = VComp(ukTablaValor,tam);
+    //int tam = 5;
+    //double *ykTablaValor = new double[tam];
+    //double *ukTablaValor = new double[tam];
+
+    VComp kp0 = VComp(1);
+    VComp kp1 = VComp(1);
+    //VComp kp2 = VComp(1);
+    VComp uk = VComp(0);
+    VComp yk = VComp(0);
+    VComp ref = VComp(1);
+    //VComp ykTabla = VComp(ykTablaValor,tam);
+    //VComp ukTabla = VComp(ukTablaValor,tam);
 
 
     Conversor c = Conversor();
     Sensor s = Sensor(&yk);
 
-    Planta *p = new Planta(&uk,&yk,&ykTabla,num,den,3);
-    Regulador *r = new Regulador(&ref,&uk,&ukTabla,pid_num,pid_den,4,&c,&s,1);
+    Planta *p1 = new Planta(&kp0,&uk,&yk,num,den,3);
+    Regulador *r1 = new Regulador(&kp1,&ref,&uk,pid_num,pid_den,4,&c,&s,1);
+    //Planta *p2 = new Planta(&kp0,&uk,&yk,&ykTabla,num,den,3);
+    //Regulador *r2 = new Regulador(&kp2,&ref,&uk,&ukTabla,pid_num,pid_den,4,&c,&s,2);
 
-    pthread_t pla, reg;		/* threads que se van a crear */
 
-    pthread_create(&pla, NULL, planta, (void*)p);
-    pthread_create(&reg, NULL, regulador, (void*)r);
+    pthread_t pla1, reg1; //pla2, reg2;		/* threads que se van a crear */
+
+    pthread_create(&pla1, NULL, planta, (void*)p1);
+    pthread_create(&reg1, NULL, regulador, (void*)r1);
+
+    //pthread_create(&pla2, NULL, planta, (void*)p2);
+    //pthread_create(&reg2, NULL, regulador, (void*)r2);
 
     QApplication a(argc, argv);
     GUI w;

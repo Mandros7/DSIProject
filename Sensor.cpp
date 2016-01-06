@@ -5,7 +5,7 @@ Sensor::Sensor(VComp* entrada) {
 }
 
 short Sensor::getValue() {
-    double valor = m_entrada->getValor()[0];
+    double valor = m_entrada->getValor();
     if (valor>20)
         valor = 20;
     if (valor<0)

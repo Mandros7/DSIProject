@@ -6,16 +6,14 @@ class VComp {
 
 private:
     pthread_mutex_t mutex;
-    double* valor;
-    int m_length;
+    double valor;
 
 public:
-    VComp(double *valor_inicial, int length);
+    VComp(double valor_inicial);
 
-	double* getValor();
-    int getLength();
+    double getValor();
 
-	void setValor(double* n_Valor);
+    void setValor(double n_Valor);
 };
 
 #endif //VCOMP_H
