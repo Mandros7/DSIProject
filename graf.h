@@ -7,11 +7,13 @@ class Graf: public QObject
 {
     Q_OBJECT
 public:
-    Graf(QCustomPlot *ptr,QObject *parent=0 );
+    Graf(double secondsBetweenPlot,QCustomPlot *ptr,QObject *parent=0 );
 
     QCustomPlot *dib;
-
     void setupRealTimeData(QCustomPlot *customPlot);
+private:
+    struct timespec inicio,ahora;
+    double elapsed_time;
 
 public slots:
     void dataSlot(double tiempo, double ref1, double y1);

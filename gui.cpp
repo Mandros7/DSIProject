@@ -23,12 +23,6 @@ GUI::GUI(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    g1 = new Graf(this->ui->customPlot,this);
-    g2 = new Graf(this->ui->customPlot2,this);
-
-    connect(&yk1TablaSalidas,SIGNAL(sendValue(double,double,double)),g1,SLOT(dataSlot(double,double,double)));
-    connect(&yk2TablaSalidas,SIGNAL(sendValue(double,double,double)),g2,SLOT(dataSlot(double,double,double)));
-
 
     connect(ui->cambiarKp1Button,SIGNAL(clicked()),this,SLOT(setKp1()));
     connect(ui->cambiarRef1Button,SIGNAL(clicked()),this,SLOT(setRef1()));
@@ -51,8 +45,6 @@ GUI::GUI(QWidget *parent) :
 GUI::~GUI()
 {
     running = false;
-    delete g1;
-    delete g2;
     delete ui;
 }
 

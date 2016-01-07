@@ -13,11 +13,12 @@
 #include <pthread.h>
 #include <vcomptabla.h>
 #include <graf.h>
+#include "ui_gui.h"
 
 using namespace std;
 
 VComp kp0(1);
-VComp kp1(1);
+VComp kp1(0.1);
 VComp uk1(0);
 VComp yk1(0);
 VComp ref1(1);
@@ -65,7 +66,7 @@ void * sistema (void * param){
     while(running){
         double entrada = p->read();
         double salida = p->simular(entrada);
-        cout << "Salida: " << salida  << "Tiempo: " << get_TimeStamp(inicial,siguiente_activacion) << endl;
+        //cout << "Salida: " << salida  << "Tiempo: " << get_TimeStamp(inicial,siguiente_activacion) << endl;
         datos->tablaSalida->add(salida,get_TimeStamp(inicial,siguiente_activacion),datos->referencia->getValor());
         add_timespec(&siguiente_activacion, &siguiente_activacion, &periodo);
         clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME,&siguiente_activacion, NULL);
@@ -104,12 +105,11 @@ int main(int argc, char *argv[])
                     -0.999};
 
     double pid_num2[] = {0.2*2445.4,
-                        -1.998*2445.4,
-                        0};
+                        -0.1998*2445.4};
 
-    double pid_den2[] = {1,
-                       -0.9998,
-                        0};
+    double pid_den2[] = {
+                         1,
+                       -0.9998};
 
 
 
@@ -120,13 +120,13 @@ int main(int argc, char *argv[])
     Planta *p1 = new Planta(&kp0,&uk1,&yk1,num1,den1,3);
     Regulador *r1 = new Regulador(&kp1,&ref1,&uk1,pid_num1,pid_den1,4,&c,&s1,1);
     Planta *p2 = new Planta(&kp0,&uk2,&yk2,num2,den2,2);
-    Regulador *r2 = new Regulador(&kp2,&ref2,&uk2,pid_num2,pid_den2,3,&c,&s2,2);
+    Regulador *r2 = new Regulador(&kp2,&ref2,&uk2,pid_num2,pid_den2,2,&c,&s2,2);
 
     struct datosSistema planta1,regulador1,planta2,regulador2;
     planta1.fdt = p1;
     planta1.tablaSalida = &yk1TablaSalidas;
     planta1.periodo.tv_sec=0;
-    planta1.periodo.tv_nsec=50000000;
+    planta1.periodo.tv_nsec=50000000/2;
     planta1.referencia = &ref1;
     regulador1.fdt = r1;
     regulador1.tablaSalida = &uk1TablaSalidas;
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     planta2.fdt = p2;
     planta2.tablaSalida = &yk2TablaSalidas;
     planta2.periodo.tv_sec=0;
-    planta2.periodo.tv_nsec=20000000;
+    planta2.periodo.tv_nsec=20000000/2;
     planta2.referencia = &ref2;
     regulador2.fdt = r2;
     regulador2.tablaSalida = &uk2TablaSalidas;
@@ -159,6 +159,11 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     GUI w;
 
+    Graf g1(0.15,w.ui->customPlot);
+    Graf g2(0.15,w.ui->customPlot2);
+
+    QObject::connect(&yk1TablaSalidas,SIGNAL(sendValue(double,double,double)),&g1,SLOT(dataSlot(double,double,double)));
+    QObject::connect(&yk2TablaSalidas,SIGNAL(sendValue(double,double,double)),&g2,SLOT(dataSlot(double,double,double)));
     w.show();
 
     return a.exec();

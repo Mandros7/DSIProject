@@ -27,6 +27,7 @@ private:
 	double productoEscalar(double* vector1, double* vector2);
     double* aplicarGanancia(double valor,double* v);
 	void desplazarTabla(double* tabla, double n_valor);
+    double checkLimit(double valor);
 };
 
 #endif //FDT_H

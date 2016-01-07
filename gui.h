@@ -17,9 +17,7 @@ public:
     explicit GUI(QWidget *parent = 0);
     ~GUI();
 
-private:
-    Graf *g1;
-    Graf *g2;
+//private:
     Ui::GUI *ui;
 
 private slots:
