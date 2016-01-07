@@ -1,6 +1,6 @@
 #include "vcomptabla.h"
 
-VCompTabla::VCompTabla(int tam)
+VCompTabla::VCompTabla(QObject *parent,int tam) : QObject(parent)
 {
     m_tam = tam;
     values = new double[tam];
@@ -9,17 +9,19 @@ VCompTabla::VCompTabla(int tam)
     }
 }
 
-void VCompTabla::add(double n_value){
+void VCompTabla::add(double n_value, double tiempo, double ref1){
     for (int i=m_tam-1;i>0;i--){
         values[i] = values[i-1];
     }
     values[0] = n_value;
+    emit sendValue(tiempo,ref1,n_value);
 }
 
-double * VCompTabla::getTabla(){
+double* VCompTabla::getTabla(){
     return values;
 }
 
-//int VCompTabla::getTam(){
-//    return m_tam;
-//}
+VCompTabla::~VCompTabla(){
+    delete values;
+}
+

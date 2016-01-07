@@ -11,6 +11,8 @@
 #include <time.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <vcomptabla.h>
+#include <graf.h>
 
 using namespace std;
 
@@ -19,19 +21,21 @@ VComp kp1(1);
 VComp uk1(0);
 VComp yk1(0);
 VComp ref1(1);
-VCompTabla yk1TablaSalidas(100);
-VCompTabla uk1TablaSalidas(100);
+VCompTabla yk1TablaSalidas(0,5);
+VCompTabla uk1TablaSalidas(0,5);
 VComp kp2(1);
 VComp uk2(0);
 VComp yk2(0);
 VComp ref2(1);
-VCompTabla yk2TablaSalidas(100);
-VCompTabla uk2TablaSalidas(100);
+VCompTabla yk2TablaSalidas(0,5);
+VCompTabla uk2TablaSalidas(0,5);
+bool running;
 
 struct datosSistema{
     VCompTabla* tablaSalida;
     struct timespec periodo;
     FDT * fdt;
+    VComp* referencia;
 };
 
 void add_timespec (struct timespec *suma,
@@ -47,21 +51,26 @@ void add_timespec (struct timespec *suma,
     }
 }
 
+double get_TimeStamp (struct timespec inicio, struct timespec ahora){
+    return (double)(ahora.tv_sec+ahora.tv_nsec*(1E-9)) - (double)(inicio.tv_sec+inicio.tv_nsec*(1E-9));
+}
+
 void * sistema (void * param){
     datosSistema* datos = (datosSistema *)param;
     FDT * p = (FDT*) datos->fdt;
-    struct timespec periodo,siguiente_activacion;
+    struct timespec inicial,periodo,siguiente_activacion;
     periodo = datos->periodo;
     clock_gettime(CLOCK_REALTIME, &siguiente_activacion);
-    while(1){
+    inicial = siguiente_activacion;
+    while(running){
         double entrada = p->read();
         double salida = p->simular(entrada);
-        datos->tablaSalida->add(salida);
-
+        cout << "Salida: " << salida  << "Tiempo: " << get_TimeStamp(inicial,siguiente_activacion) << endl;
+        datos->tablaSalida->add(salida,get_TimeStamp(inicial,siguiente_activacion),datos->referencia->getValor());
         add_timespec(&siguiente_activacion, &siguiente_activacion, &periodo);
         clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME,&siguiente_activacion, NULL);
     }
-
+    cout<<"Returned"<<endl;
     return 0;
 }
 
@@ -98,9 +107,9 @@ int main(int argc, char *argv[])
                         -1.998*2445.4,
                         0};
 
-    double pid_den2[] = {0,
-                        1,
-                       -0.9998};
+    double pid_den2[] = {1,
+                       -0.9998,
+                        0};
 
 
 
@@ -117,33 +126,39 @@ int main(int argc, char *argv[])
     planta1.fdt = p1;
     planta1.tablaSalida = &yk1TablaSalidas;
     planta1.periodo.tv_sec=0;
-    planta1.periodo.tv_nsec=300000000;
+    planta1.periodo.tv_nsec=50000000;
+    planta1.referencia = &ref1;
     regulador1.fdt = r1;
     regulador1.tablaSalida = &uk1TablaSalidas;
     regulador1.periodo.tv_sec=0;
-    regulador1.periodo.tv_nsec=300000000;
+    regulador1.periodo.tv_nsec=50000000;
+    regulador1.referencia = &ref1;
     planta2.fdt = p2;
     planta2.tablaSalida = &yk2TablaSalidas;
     planta2.periodo.tv_sec=0;
-    planta2.periodo.tv_nsec=300000000;
+    planta2.periodo.tv_nsec=20000000;
+    planta2.referencia = &ref2;
     regulador2.fdt = r2;
     regulador2.tablaSalida = &uk2TablaSalidas;
     regulador2.periodo.tv_sec=0;
-    regulador2.periodo.tv_nsec=300000000;
+    regulador2.periodo.tv_nsec=20000000;
+    regulador2.referencia = &ref2;
 
     pthread_t pla1, reg1, pla2, reg2;		/* threads que se van a crear */
+
+    running = true;
 
     pthread_create(&pla1, NULL, sistema, (void*)&planta1);
     pthread_create(&reg1, NULL, sistema, (void*)&regulador1);
     pthread_create(&pla2, NULL, sistema, (void*)&planta2);
     pthread_create(&reg2, NULL, sistema, (void*)&regulador2);
 
-
     //pthread_create(&pla2, NULL, planta, (void*)p2);
     //pthread_create(&reg2, NULL, regulador, (void*)r2);
 
     QApplication a(argc, argv);
     GUI w;
+
     w.show();
 
     return a.exec();

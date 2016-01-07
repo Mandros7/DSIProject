@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = DSIProject
 TEMPLATE = app
@@ -20,7 +20,9 @@ SOURCES += main.cpp\
     Sensor.cpp \
     VComp.cpp \
     FDT.cpp \
-    vcomptabla.cpp
+    vcomptabla.cpp \
+    graf.cpp \
+    qcustomplot.cpp
 
 HEADERS  += gui.h \
     Conversor.h \
@@ -29,6 +31,8 @@ HEADERS  += gui.h \
     Sensor.h \
     VComp.h \
     FDT.h \
-    vcomptabla.h
+    vcomptabla.h \
+    graf.h \
+    qcustomplot.h
 
 FORMS    += gui.ui

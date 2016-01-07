@@ -29,7 +29,7 @@ double Regulador::read() {
     pthread_mutex_unlock(&conv->mutex);
 
     conv->convert(value);
-    double salida = conv->getRegistroDatos();
+    double salidaConversor = conv->getRegistroDatos();
 
     pthread_mutex_lock(&conv->mutex);
     conv->setRegistroControl(0);
@@ -41,5 +41,5 @@ double Regulador::read() {
 
     //usleep(1000000);
 
-    return (m_entrada->getValor() - salida);
+    return (m_entrada->getValor() - salidaConversor);
 }

@@ -17,9 +17,9 @@ FDT::FDT(VComp* kp,VComp* entrada, VComp* salida, double* coefNum, double* coefD
 }
 
 double* FDT::aplicarGanancia(double valor,double* v){
-    double * vec = v;
+    double * vec = new double[m_tam];
     for (int i=0;i<m_tam;i++){
-        vec[i] = vec[i]*valor;
+        vec[i] = v[i]*valor;
     }
     return vec;
 }

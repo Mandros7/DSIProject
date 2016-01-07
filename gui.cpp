@@ -2,6 +2,8 @@
 #include "ui_gui.h"
 #include "VComp.h"
 #include "vcomptabla.h"
+#include <iostream>
+#include <graf.h>
 
 extern VComp kp1;
 extern VComp ref1;
@@ -11,12 +13,22 @@ extern VComp kp2;
 extern VComp ref2;
 extern VCompTabla yk2TablaSalidas;
 extern VCompTabla uk2TablaSalidas;
+extern bool running;
+
+using namespace std;
 
 GUI::GUI(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::GUI)
 {
     ui->setupUi(this);
+
+    g1 = new Graf(this->ui->customPlot,this);
+    g2 = new Graf(this->ui->customPlot2,this);
+
+    connect(&yk1TablaSalidas,SIGNAL(sendValue(double,double,double)),g1,SLOT(dataSlot(double,double,double)));
+    connect(&yk2TablaSalidas,SIGNAL(sendValue(double,double,double)),g2,SLOT(dataSlot(double,double,double)));
+
 
     connect(ui->cambiarKp1Button,SIGNAL(clicked()),this,SLOT(setKp1()));
     connect(ui->cambiarRef1Button,SIGNAL(clicked()),this,SLOT(setRef1()));
@@ -38,6 +50,9 @@ GUI::GUI(QWidget *parent) :
 
 GUI::~GUI()
 {
+    running = false;
+    delete g1;
+    delete g2;
     delete ui;
 }
 

@@ -2,6 +2,8 @@
 #define GUI_H
 
 #include <QMainWindow>
+#include <qcustomplot.h>
+#include <graf.h>
 
 namespace Ui {
 class GUI;
@@ -15,6 +17,11 @@ public:
     explicit GUI(QWidget *parent = 0);
     ~GUI();
 
+private:
+    Graf *g1;
+    Graf *g2;
+    Ui::GUI *ui;
+
 private slots:
     void setKp1();
     void setRef1();
@@ -22,10 +29,6 @@ private slots:
     void setKp2();
     void setRef2();
     void actualizarTablasLazo2();
-
-
-private:
-    Ui::GUI *ui;
 };
 
 #endif // GUI_H
