@@ -20,9 +20,9 @@ SOURCES += main.cpp\
     Sensor.cpp \
     VComp.cpp \
     FDT.cpp \
-    vcomptabla.cpp \
     graf.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    vcomptabla.cpp
 
 HEADERS  += gui.h \
     Conversor.h \
@@ -31,8 +31,8 @@ HEADERS  += gui.h \
     Sensor.h \
     VComp.h \
     FDT.h \
-    vcomptabla.h \
     graf.h \
-    qcustomplot.h
+    qcustomplot.h \
+    vcomptabla.h
 
 FORMS    += gui.ui

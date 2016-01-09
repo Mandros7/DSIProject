@@ -2,6 +2,7 @@
 #include "qcustomplot.h"
 #include <stdlib.h>
 
+
 extern double get_TimeStamp (struct timespec inicio, struct timespec ahora);
 
 Graf::Graf(double secondsBetweenPlot,QCustomPlot *ptr,QObject *parent ): QObject(parent)
@@ -10,6 +11,8 @@ Graf::Graf(double secondsBetweenPlot,QCustomPlot *ptr,QObject *parent ): QObject
     setupRealTimeData(dib);
     clock_gettime(CLOCK_REALTIME, &inicio);
     elapsed_time = secondsBetweenPlot;
+    minAxeY=-1;
+    maxAxeY=10;
 }
 
 void Graf::setupRealTimeData(QCustomPlot *customPlot)
@@ -34,25 +37,20 @@ void Graf:: dataSlot(double tiempo, double ref1, double y1)
     clock_gettime(CLOCK_REALTIME, &ahora);
     if (get_TimeStamp(inicio,ahora)>elapsed_time){
         inicio = ahora;
-        static float minAxeY=-1;
-        static float maxAxeY=10;
-        //if (ref1> maxAxeY) maxAxeY= ref1;
-        //if (y1> maxAxeY) maxAxeY= y1;
 
-        //if (ref1 <  minAxeY) minAxeY= ref1;
-        //if (y1 < minAxeY) minAxeY= y1;
 
-        // añadir nuevo par de datos al gráfico:
+        if (ref1> maxAxeY) maxAxeY= ref1;
+        if (y1> maxAxeY) maxAxeY= y1;
 
-        dib->graph(0)->addData(tiempo, ref1);  // dibujar ref
-        if(!(y1!=y1)){
+        if (ref1 <  minAxeY) minAxeY= ref1;
+        if (y1 < minAxeY) minAxeY= y1;
+
+        if(maxAxeY<10) maxAxeY = 10;
+        if(minAxeY>-1) minAxeY = 1;
+
+        dib->graph(0)->addData(tiempo, ref1);
         dib->graph(1)->addData(tiempo, y1);
-        }// dibujar salida
-        // Sin Reescalado de los ejes, la curva se comprime porque se
-        // aumenta la ventana temporal
-        // Si se quitan los comentarios la ventana temporal cambia sus límtes
-        // pero no su tamaño.La curva se desplaza, aparece por la dcha y se va por la izq.
-    // /*
+
         dib->graph(1)->rescaleAxes(true);
         dib->graph(0)->rescaleAxes(true);
 
@@ -60,8 +58,13 @@ void Graf:: dataSlot(double tiempo, double ref1, double y1)
         dib->graph(0)->rescaleKeyAxis(true);
 
         dib->xAxis->setRange(tiempo,10, Qt::AlignRight);
-        dib->yAxis->setRange ( minAxeY*1.1,maxAxeY*1.1);
-    // */
+        dib->yAxis->setRange (minAxeY*1.1,maxAxeY*1.1);
+
         dib->replot();
+
+        clock_gettime(CLOCK_REALTIME, &tiempoBucle);
+        if(get_TimeStamp(ahora,tiempoBucle)>elapsed_time){
+            elapsed_time = get_TimeStamp(ahora,tiempoBucle)*1.15;
+        }
     }
 }

@@ -12,8 +12,10 @@ public:
     QCustomPlot *dib;
     void setupRealTimeData(QCustomPlot *customPlot);
 private:
-    struct timespec inicio,ahora;
+    struct timespec inicio,ahora,tiempoBucle;
     double elapsed_time;
+    double minAxeY;
+    double maxAxeY;
 
 public slots:
     void dataSlot(double tiempo, double ref1, double y1);

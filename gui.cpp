@@ -2,7 +2,6 @@
 #include "ui_gui.h"
 #include "VComp.h"
 #include "vcomptabla.h"
-#include <iostream>
 #include <graf.h>
 
 extern VComp kp1;
@@ -15,7 +14,6 @@ extern VCompTabla yk2TablaSalidas;
 extern VCompTabla uk2TablaSalidas;
 extern bool running;
 
-using namespace std;
 
 GUI::GUI(QWidget *parent) :
     QMainWindow(parent),

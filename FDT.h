@@ -15,19 +15,15 @@ protected:
     VComp* m_entrada;
     VComp* m_salida;
     VComp* m_kp;
-
 public:
 	virtual double read() = 0;
-
     FDT(VComp* kp, VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam);
-
     double simular(double n_entrada);
+    VComp* getKp();
 
 private:
 	double productoEscalar(double* vector1, double* vector2);
-    double* aplicarGanancia(double valor,double* v);
 	void desplazarTabla(double* tabla, double n_valor);
-    double checkLimit(double valor);
 };
 
 #endif //FDT_H

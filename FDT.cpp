@@ -16,18 +16,10 @@ FDT::FDT(VComp* kp,VComp* entrada, VComp* salida, double* coefNum, double* coefD
     }
 }
 
-double* FDT::aplicarGanancia(double valor,double* v){
-    double * vec = new double[m_tam];
-    for (int i=0;i<m_tam;i++){
-        vec[i] = v[i]*valor;
-    }
-    return vec;
-}
-
 double FDT::simular(double n_entrada) {
     desplazarTabla(m_xk,n_entrada);
     desplazarTabla(m_yk,0);
-    m_yk[0] = checkLimit(productoEscalar(m_xk,aplicarGanancia(m_kp->getValor(),m_coefNum)) - productoEscalar(m_yk,m_coefDen));
+    m_yk[0] = (productoEscalar(m_xk,m_coefNum) - productoEscalar(m_yk,m_coefDen));
     m_salida->setValor(m_yk[0]);
     return m_yk[0];
 }
@@ -44,15 +36,9 @@ void FDT::desplazarTabla(double* tabla, double n_valor) {
     for (int i=m_tam-1;i>0;i--){
         tabla[i] = tabla[i-1];
     }
-    tabla[0] = checkLimit(n_valor);
+    tabla[0] = n_valor;
 }
 
-double FDT::checkLimit(double valor){
-    if (valor>1E5){
-        valor = 1E100;
-    }
-    if (valor<-1E5){
-        valor = -1E100;
-    }
-    return valor;
+VComp* FDT::getKp(){
+    return m_kp;
 }

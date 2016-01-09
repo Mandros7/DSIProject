@@ -21,13 +21,13 @@ VComp kp0(1);
 VComp kp1(0.1);
 VComp uk1(0);
 VComp yk1(0);
-VComp ref1(1);
+VComp ref1(5);
 VCompTabla yk1TablaSalidas(0,5);
 VCompTabla uk1TablaSalidas(0,5);
-VComp kp2(1);
+VComp kp2(5);
 VComp uk2(0);
 VComp yk2(0);
-VComp ref2(1);
+VComp ref2(5);
 VCompTabla yk2TablaSalidas(0,5);
 VCompTabla uk2TablaSalidas(0,5);
 bool running;
@@ -65,8 +65,7 @@ void * sistema (void * param){
     inicial = siguiente_activacion;
     while(running){
         double entrada = p->read();
-        double salida = p->simular(entrada);
-        //cout << "Salida: " << salida  << "Tiempo: " << get_TimeStamp(inicial,siguiente_activacion) << endl;
+        double salida = p->simular(entrada*p->getKp()->getValor());
         datos->tablaSalida->add(salida,get_TimeStamp(inicial,siguiente_activacion),datos->referencia->getValor());
         add_timespec(&siguiente_activacion, &siguiente_activacion, &periodo);
         clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME,&siguiente_activacion, NULL);
@@ -159,8 +158,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     GUI w;
 
-    Graf g1(0.15,w.ui->customPlot);
-    Graf g2(0.15,w.ui->customPlot2);
+    Graf g1(0.003,w.ui->customPlot);
+    Graf g2(0.003,w.ui->customPlot2);
 
     QObject::connect(&yk1TablaSalidas,SIGNAL(sendValue(double,double,double)),&g1,SLOT(dataSlot(double,double,double)));
     QObject::connect(&yk2TablaSalidas,SIGNAL(sendValue(double,double,double)),&g2,SLOT(dataSlot(double,double,double)));
