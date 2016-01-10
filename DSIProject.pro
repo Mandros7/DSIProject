@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     FDT.cpp \
     graf.cpp \
     qcustomplot.cpp \
-    vcomptabla.cpp
+    vcomptabla.cpp \
+    RegistroControl.cpp
 
 HEADERS  += gui.h \
     Conversor.h \
@@ -33,6 +34,7 @@ HEADERS  += gui.h \
     FDT.h \
     graf.h \
     qcustomplot.h \
-    vcomptabla.h
+    vcomptabla.h \
+    RegistroControl.h
 
 FORMS    += gui.ui

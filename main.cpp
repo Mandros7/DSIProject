@@ -6,7 +6,6 @@
 #include "Regulador.h"
 #include "VComp.h"
 #include "vcomptabla.h"
-#include <iostream>
 #include <unistd.h>
 #include <time.h>
 #include <stdlib.h>
@@ -15,7 +14,9 @@
 #include <graf.h>
 #include "ui_gui.h"
 
+#include <iostream>
 using namespace std;
+
 
 VComp kp0(1);
 VComp kp1(0.1);
@@ -43,12 +44,12 @@ void add_timespec (struct timespec *suma,
                    const struct timespec *sumando1,
                    const struct timespec *sumando2 )
 {
-    suma->tv_sec = sumando1->tv_sec  + sumando2->tv_sec;  // calcula segundos
-    suma->tv_nsec = sumando1->tv_nsec + sumando2->tv_nsec; // calcula nsegundos
-    if (suma->tv_nsec >= 1E9)  // ver si tenemos un segundo completo
+    suma->tv_sec = sumando1->tv_sec  + sumando2->tv_sec;
+    suma->tv_nsec = sumando1->tv_nsec + sumando2->tv_nsec;
+    if (suma->tv_nsec >= 1E9)
     {
-        suma->tv_sec ++;		// añadir 1 a la cuenta de segundos
-        suma->tv_nsec -= 1E9;	// calcular los ns que quedan
+        suma->tv_sec ++;
+        suma->tv_nsec -= 1E9;
     }
 }
 
@@ -64,13 +65,15 @@ void * sistema (void * param){
     clock_gettime(CLOCK_REALTIME, &siguiente_activacion);
     inicial = siguiente_activacion;
     while(running){
-        double entrada = p->read();
-        double salida = p->simular(entrada*p->getKp()->getValor());
-        datos->tablaSalida->add(salida,get_TimeStamp(inicial,siguiente_activacion),datos->referencia->getValor());
+        double resultado;
+        int entrada = p->read(&resultado);
+        if (entrada!=-1){
+            double salida = p->simular(resultado);
+            datos->tablaSalida->add(salida,get_TimeStamp(inicial,siguiente_activacion),datos->referencia->getValor());
+        }
         add_timespec(&siguiente_activacion, &siguiente_activacion, &periodo);
         clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME,&siguiente_activacion, NULL);
     }
-    cout<<"Returned"<<endl;
     return 0;
 }
 
@@ -158,8 +161,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     GUI w;
 
-    Graf g1(0.003,w.ui->customPlot);
-    Graf g2(0.003,w.ui->customPlot2);
+    Graf g1(0.001,w.ui->customPlot);
+    Graf g2(0.001,w.ui->customPlot2);
 
     QObject::connect(&yk1TablaSalidas,SIGNAL(sendValue(double,double,double)),&g1,SLOT(dataSlot(double,double,double)));
     QObject::connect(&yk2TablaSalidas,SIGNAL(sendValue(double,double,double)),&g2,SLOT(dataSlot(double,double,double)));

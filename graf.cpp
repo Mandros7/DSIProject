@@ -1,7 +1,9 @@
 #include "graf.h"
 #include "qcustomplot.h"
 #include <stdlib.h>
+#include <iostream>
 
+using namespace std;
 
 extern double get_TimeStamp (struct timespec inicio, struct timespec ahora);
 
@@ -62,9 +64,20 @@ void Graf:: dataSlot(double tiempo, double ref1, double y1)
 
         dib->replot();
 
+        //Metodo adaptativo de actualizacion de graficas en funcion de uso de CPU
+        //Permite que la interfaz siga siendo utilizable modificando el tiempo de refresco de las gráficas
+
+
         clock_gettime(CLOCK_REALTIME, &tiempoBucle);
+        // Si el tiempo de procesado del slot es mayor al periodo de refresco, se aumenta este ultimo en 20%
         if(get_TimeStamp(ahora,tiempoBucle)>elapsed_time){
-            elapsed_time = get_TimeStamp(ahora,tiempoBucle)*1.15;
+            elapsed_time = get_TimeStamp(ahora,tiempoBucle)*1.2;
+            //cout << elapsed_time << endl;
+        }
+        // Si el tiempo de procesado disminuye hasta ser 20 veces menor que el periodo, se diminuye el periodo
+        if(get_TimeStamp(ahora,tiempoBucle)*20<elapsed_time){
+            elapsed_time = get_TimeStamp(ahora,tiempoBucle)*10;
+            //cout << elapsed_time << endl;
         }
     }
 }

@@ -4,7 +4,7 @@
 #include "FDT.h"
 class Planta : public FDT {
 public:
-	double read();
+    int read(double *resultado);
 
     Planta(VComp* kp,VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam);
 };

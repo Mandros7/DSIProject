@@ -11,12 +11,14 @@ private:
     Sensor *sens;
     Conversor *conv;
     int chan;
+    struct timespec periodo;
 
 public:
     Regulador(VComp* kp,VComp* entrada, VComp* salida, double* coefNum,
               double* coefDen, int tam, Conversor* c, Sensor *s, int channel);
 
-	double read();
+    int read(double * resultado);
+    VComp* getRef();
 };
 
 #endif //REGULADOR_H

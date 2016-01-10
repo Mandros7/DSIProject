@@ -3,23 +3,25 @@
 
 #include "VComp.h"
 #include <pthread.h>
+#include <RegistroControl.h>
 
 
 class Conversor {
 
 private:
     double registroDatos;
-    double registroControl;
-
 
 public:
     double getRegistroDatos();
-    double getRegistroControl();
+    RegistroControl getRegistroControl();
     void setRegistroControl(double channel);
     void convert(short sensValor);
     pthread_mutex_t mutex;
     pthread_cond_t cond;
+    pthread_cond_t convFinished;
     Conversor();
+    RegistroControl CSR;
+
 };
 
 #endif //CONVERSOR_H

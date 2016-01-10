@@ -16,7 +16,7 @@ protected:
     VComp* m_salida;
     VComp* m_kp;
 public:
-	virtual double read() = 0;
+    virtual int read(double* resultado) = 0;
     FDT(VComp* kp, VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam);
     double simular(double n_entrada);
     VComp* getKp();
