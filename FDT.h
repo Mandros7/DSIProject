@@ -14,12 +14,9 @@ private:
 protected:
     VComp* m_entrada;
     VComp* m_salida;
-    VComp* m_kp;
 public:
-    virtual int read(double* resultado) = 0;
-    FDT(VComp* kp, VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam);
+    FDT(VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam);
     double simular(double n_entrada);
-    VComp* getKp();
 
 private:
 	double productoEscalar(double* vector1, double* vector2);

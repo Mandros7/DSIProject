@@ -1,11 +1,10 @@
 #include "Planta.h"
 
-int Planta::read(double *resultado) {
-    (*resultado) = m_entrada->getValor();
-    return 0;
+double Planta::read() {
+    return m_entrada->getValor();
 }
 
-Planta::Planta(VComp* kp, VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam) :
-    FDT(kp,entrada,salida,coefNum,coefDen,tam){
+Planta::Planta(VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam) :
+    FDT(entrada,salida,coefNum,coefDen,tam){
     // Nada que asignar
 }

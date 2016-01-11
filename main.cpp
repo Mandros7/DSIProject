@@ -5,12 +5,11 @@
 #include "Planta.h"
 #include "Regulador.h"
 #include "VComp.h"
-#include "vcomptabla.h"
+#include "VCompGrafica.h"
 #include <unistd.h>
 #include <time.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <vcomptabla.h>
 #include <graf.h>
 #include "ui_gui.h"
 
@@ -23,21 +22,19 @@ VComp kp1(0.1);
 VComp uk1(0);
 VComp yk1(0);
 VComp ref1(5);
-VCompTabla yk1TablaSalidas(0,5);
-VCompTabla uk1TablaSalidas(0,5);
+VCompGrafica TablaSalidas1(0,5);
 VComp kp2(5);
 VComp uk2(0);
 VComp yk2(0);
 VComp ref2(5);
-VCompTabla yk2TablaSalidas(0,5);
-VCompTabla uk2TablaSalidas(0,5);
+VCompGrafica TablaSalidas2(0,5);
 bool running;
 
 struct datosSistema{
-    VCompTabla* tablaSalida;
+    VCompGrafica* tablaSalida;
     struct timespec periodo;
     FDT * fdt;
-    VComp* referencia;
+    int numLazo;
 };
 
 void add_timespec (struct timespec *suma,
@@ -57,19 +54,35 @@ double get_TimeStamp (struct timespec inicio, struct timespec ahora){
     return (double)(ahora.tv_sec+ahora.tv_nsec*(1E-9)) - (double)(inicio.tv_sec+inicio.tv_nsec*(1E-9));
 }
 
-void * sistema (void * param){
+void * planta (void * param){
     datosSistema* datos = (datosSistema *)param;
-    FDT * p = (FDT*) datos->fdt;
+    Planta * p = (Planta*) datos->fdt;
+    struct timespec inicial,periodo,siguiente_activacion;
+    periodo = datos->periodo;
+    clock_gettime(CLOCK_REALTIME, &siguiente_activacion);
+    inicial = siguiente_activacion;
+    while(running){
+        double resultado = p->read();
+        double salida = p->simular(resultado);
+        add_timespec(&siguiente_activacion, &siguiente_activacion, &periodo);
+        clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME,&siguiente_activacion, NULL);
+    }
+    return 0;
+}
+
+void * regulador (void * param){
+    datosSistema* datos = (datosSistema *)param;
+    Regulador * p = (Regulador*) datos->fdt;
     struct timespec inicial,periodo,siguiente_activacion;
     periodo = datos->periodo;
     clock_gettime(CLOCK_REALTIME, &siguiente_activacion);
     inicial = siguiente_activacion;
     while(running){
         double resultado;
-        int entrada = p->read(&resultado);
+        int entrada = p->read(&resultado,datos->numLazo);
         if (entrada!=-1){
-            double salida = p->simular(resultado);
-            datos->tablaSalida->add(salida,get_TimeStamp(inicial,siguiente_activacion),datos->referencia->getValor());
+            double salida = p->simular((p->getRef()->getValor()-resultado)*p->getKp()->getValor());
+            datos->tablaSalida->add(salida,resultado,get_TimeStamp(inicial,siguiente_activacion),p->getRef()->getValor());
         }
         add_timespec(&siguiente_activacion, &siguiente_activacion, &periodo);
         clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME,&siguiente_activacion, NULL);
@@ -119,41 +132,37 @@ int main(int argc, char *argv[])
     Sensor s1 = Sensor(&yk1);
     Sensor s2 = Sensor(&yk2);
 
-    Planta *p1 = new Planta(&kp0,&uk1,&yk1,num1,den1,3);
-    Regulador *r1 = new Regulador(&kp1,&ref1,&uk1,pid_num1,pid_den1,4,&c,&s1,1);
-    Planta *p2 = new Planta(&kp0,&uk2,&yk2,num2,den2,2);
-    Regulador *r2 = new Regulador(&kp2,&ref2,&uk2,pid_num2,pid_den2,2,&c,&s2,2);
+    Planta *p1 = new Planta(&uk1,&yk1,num1,den1,3);
+    Regulador *r1 = new Regulador(&kp1,&ref1,&uk1,pid_num1,pid_den1,4,&c,&s1);
+    Planta *p2 = new Planta(&uk2,&yk2,num2,den2,2);
+    Regulador *r2 = new Regulador(&kp2,&ref2,&uk2,pid_num2,pid_den2,2,&c,&s2);
 
     struct datosSistema planta1,regulador1,planta2,regulador2;
     planta1.fdt = p1;
-    planta1.tablaSalida = &yk1TablaSalidas;
     planta1.periodo.tv_sec=0;
     planta1.periodo.tv_nsec=50000000/2;
-    planta1.referencia = &ref1;
     regulador1.fdt = r1;
-    regulador1.tablaSalida = &uk1TablaSalidas;
+    regulador1.tablaSalida = &TablaSalidas1;
     regulador1.periodo.tv_sec=0;
     regulador1.periodo.tv_nsec=50000000;
-    regulador1.referencia = &ref1;
+    regulador1.numLazo = 0;
     planta2.fdt = p2;
-    planta2.tablaSalida = &yk2TablaSalidas;
     planta2.periodo.tv_sec=0;
     planta2.periodo.tv_nsec=20000000/2;
-    planta2.referencia = &ref2;
     regulador2.fdt = r2;
-    regulador2.tablaSalida = &uk2TablaSalidas;
+    regulador2.tablaSalida = &TablaSalidas2;
     regulador2.periodo.tv_sec=0;
     regulador2.periodo.tv_nsec=20000000;
-    regulador2.referencia = &ref2;
+    regulador2.numLazo = 1;
 
     pthread_t pla1, reg1, pla2, reg2;		/* threads que se van a crear */
 
     running = true;
 
-    pthread_create(&pla1, NULL, sistema, (void*)&planta1);
-    pthread_create(&reg1, NULL, sistema, (void*)&regulador1);
-    pthread_create(&pla2, NULL, sistema, (void*)&planta2);
-    pthread_create(&reg2, NULL, sistema, (void*)&regulador2);
+    pthread_create(&pla1, NULL, planta, (void*)&planta1);
+    pthread_create(&reg1, NULL, regulador, (void*)&regulador1);
+    pthread_create(&pla2, NULL, planta, (void*)&planta2);
+    pthread_create(&reg2, NULL, regulador, (void*)&regulador2);
 
     //pthread_create(&pla2, NULL, planta, (void*)p2);
     //pthread_create(&reg2, NULL, regulador, (void*)r2);
@@ -164,8 +173,8 @@ int main(int argc, char *argv[])
     Graf g1(0.001,w.ui->customPlot);
     Graf g2(0.001,w.ui->customPlot2);
 
-    QObject::connect(&yk1TablaSalidas,SIGNAL(sendValue(double,double,double)),&g1,SLOT(dataSlot(double,double,double)));
-    QObject::connect(&yk2TablaSalidas,SIGNAL(sendValue(double,double,double)),&g2,SLOT(dataSlot(double,double,double)));
+    QObject::connect(&TablaSalidas1,SIGNAL(sendValue(double,double,double)),&g1,SLOT(dataSlot(double,double,double)));
+    QObject::connect(&TablaSalidas2,SIGNAL(sendValue(double,double,double)),&g2,SLOT(dataSlot(double,double,double)));
     w.show();
 
     return a.exec();

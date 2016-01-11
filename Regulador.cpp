@@ -6,16 +6,24 @@ void add_timespec (struct timespec *suma,
                    const struct timespec *sumando2 );
 
 Regulador::Regulador(VComp* kp, VComp* entrada, VComp* salida, double* coefNum,
-                     double* coefDen, int tam, Conversor *c, Sensor *s, int channel) :
-    FDT(kp,entrada,salida,coefNum,coefDen,tam){
+                     double* coefDen, int tam, Conversor *c, Sensor *s) :
+    FDT(entrada,salida,coefNum,coefDen,tam){
     conv = c;
     sens = s;
-    chan = channel;
     periodo.tv_nsec = 2000000;
     periodo.tv_sec = 0;
+    m_kp = kp;
 }
 
-int Regulador::read(double *resultado) {
+VComp* Regulador::getKp(){
+    return m_kp;
+}
+
+VComp* Regulador::getRef(){
+    return m_entrada;
+}
+
+int Regulador::read(double *resultado, int chan) {
     struct timespec inicio,fin;
 
     clock_gettime(CLOCK_REALTIME,&inicio);
@@ -44,7 +52,7 @@ int Regulador::read(double *resultado) {
         return -1;
     }
 
-    (*resultado) = (m_entrada->getValor()-conv->getRegistroDatos())*m_kp->getValor();
+    (*resultado) = (conv->getRegistroDatos());
 
     clock_nanosleep(CLOCK_REALTIME,TIMER_ABSTIME,&fin,NULL);
 

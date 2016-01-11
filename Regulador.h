@@ -10,15 +10,16 @@ class Regulador : public FDT {
 private:
     Sensor *sens;
     Conversor *conv;
-    int chan;
     struct timespec periodo;
+    VComp* m_kp;
 
 public:
     Regulador(VComp* kp,VComp* entrada, VComp* salida, double* coefNum,
-              double* coefDen, int tam, Conversor* c, Sensor *s, int channel);
+              double* coefDen, int tam, Conversor* c, Sensor *s);
 
-    int read(double * resultado);
+    int read(double * resultado, int chan);
     VComp* getRef();
+    VComp* getKp();
 };
 
 #endif //REGULADOR_H

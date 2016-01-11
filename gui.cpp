@@ -1,17 +1,15 @@
 #include "gui.h"
 #include "ui_gui.h"
 #include "VComp.h"
-#include "vcomptabla.h"
+#include "VCompGrafica.h"
 #include <graf.h>
 
 extern VComp kp1;
 extern VComp ref1;
-extern VCompTabla yk1TablaSalidas;
-extern VCompTabla uk1TablaSalidas;
+extern VCompGrafica TablaSalidas1;
 extern VComp kp2;
 extern VComp ref2;
-extern VCompTabla yk2TablaSalidas;
-extern VCompTabla uk2TablaSalidas;
+extern VCompGrafica TablaSalidas2;
 extern bool running;
 
 
@@ -75,11 +73,11 @@ void GUI::setKp1()
 }
 
 void GUI::actualizarTablasLazo1(){
-    double * yk1Salidas = yk1TablaSalidas.getTabla();
-    double * uk1Salidas = uk1TablaSalidas.getTabla();
+    double * tablasYk = TablaSalidas1.getTablaYk();
+    double * tablasUk = TablaSalidas1.getTablaUk();
     for (int i=0; i<5;i++){
-        ui->tableWidget->setItem(0,i,new QTableWidgetItem(QString("%1").arg(yk1Salidas[i])));
-        ui->tableWidget->setItem(1,i,new QTableWidgetItem(QString("%1").arg(uk1Salidas[i])));
+        ui->tableWidget->setItem(0,i,new QTableWidgetItem(QString("%1").arg(tablasYk[i])));
+        ui->tableWidget->setItem(1,i,new QTableWidgetItem(QString("%1").arg(tablasUk[i])));
     }
 }
 
@@ -112,10 +110,10 @@ void GUI::setKp2()
 }
 
 void GUI::actualizarTablasLazo2(){
-    double * yk2Salidas = yk2TablaSalidas.getTabla();
-    double * uk2Salidas = uk2TablaSalidas.getTabla();
+    double * tablasYk = TablaSalidas2.getTablaYk();
+    double * tablasUk = TablaSalidas2.getTablaUk();
     for (int i=0; i<5;i++){
-        ui->tableWidget2->setItem(0,i,new QTableWidgetItem(QString("%1").arg(yk2Salidas[i])));
-        ui->tableWidget2->setItem(1,i,new QTableWidgetItem(QString("%1").arg(uk2Salidas[i])));
+        ui->tableWidget2->setItem(0,i,new QTableWidgetItem(QString("%1").arg(tablasYk[i])));
+        ui->tableWidget2->setItem(1,i,new QTableWidgetItem(QString("%1").arg(tablasUk[i])));
     }
 }

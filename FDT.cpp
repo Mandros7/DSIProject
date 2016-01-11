@@ -1,9 +1,8 @@
 #include "FDT.h"
 
-FDT::FDT(VComp* kp,VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam) {
+FDT::FDT(VComp* entrada, VComp* salida, double* coefNum, double* coefDen, int tam) {
     m_entrada = entrada;
     m_salida = salida;
-    m_kp = kp;
     m_coefNum = coefNum;
     m_coefDen = coefDen;
     m_tam = tam;
@@ -37,8 +36,4 @@ void FDT::desplazarTabla(double* tabla, double n_valor) {
         tabla[i] = tabla[i-1];
     }
     tabla[0] = n_valor;
-}
-
-VComp* FDT::getKp(){
-    return m_kp;
 }
