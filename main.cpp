@@ -188,18 +188,24 @@ int main(int argc, char *argv[])
     pthread_attr_init(&propPla1);
     pthread_attr_setschedparam(&propPla1,&param_P1);
     pthread_attr_setschedpolicy(&propPla1,SCHED_FIFO);
+    pthread_attr_setinheritsched(&propPla1,PTHREAD_PRIO_PROTECT);
+
 
     pthread_attr_init(&propPla2);
     pthread_attr_setschedparam(&propPla2,&param_P2);
     pthread_attr_setschedpolicy(&propPla2,SCHED_FIFO);
+    pthread_attr_setinheritsched(&propPla2,PTHREAD_PRIO_PROTECT);
 
     pthread_attr_init(&propReg1);
     pthread_attr_setschedparam(&propReg1,&param_R1);
     pthread_attr_setschedpolicy(&propReg1,SCHED_FIFO);
+    pthread_attr_setinheritsched(&propReg1,PTHREAD_PRIO_PROTECT);
+
 
     pthread_attr_init(&propReg2);
     pthread_attr_setschedparam(&propReg2,&param_R2);
     pthread_attr_setschedpolicy(&propReg2,SCHED_FIFO);
+    pthread_attr_setinheritsched(&propReg2,PTHREAD_PRIO_PROTECT);
 
     // Se lanzan los hilos
     pthread_create(&pla1, &propPla1, planta, (void*)&planta1);

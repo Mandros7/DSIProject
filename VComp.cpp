@@ -7,8 +7,11 @@
  */
 
 VComp::VComp(double valor_inicial) {
+    pthread_mutexattr_t atributos;
+    pthread_mutexattr_init(&atributos);
+    pthread_mutexattr_setprotocol(&atributos,PTHREAD_PRIO_PROTECT);
     valor= valor_inicial;
-    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&mutex, &atributos);
 }
 
 double VComp::getValor() {
