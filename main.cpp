@@ -12,11 +12,11 @@
 #include <pthread.h>
 #include <graf.h>
 #include "ui_gui.h"
+#include <sched.h>
 
-#include <iostream>
-using namespace std;
-
-
+// Variables globales compartidas por hilos workers y de interfaz
+// Variables VComp contienen un double inicializado con el valor del parametro
+// Variables VCompGrafica contiene un array de double inicializado entero a 0. (segundo parametro es el tamaño)
 VComp kp0(1);
 VComp kp1(0.1);
 VComp uk1(0);
@@ -30,13 +30,17 @@ VComp ref2(5);
 VCompGrafica TablaSalidas2(0,5);
 bool running;
 
+// Estructura de datos que se pasa a los hilos
+// En el caso de los hilos tipo planta, no todos los atributos se asignan
 struct datosSistema{
     VCompGrafica* tablaSalida;
-    struct timespec periodo;
-    FDT * fdt;
-    int numLazo;
+    struct timespec periodo;   // Periodo de ejecucion
+    FDT * fdt;                 // Objeto tipo FDT, que puede ser cualquiera de los hijos: planta, regulador
+    int numLazo;               // Identificador de lazo de control
 };
 
+// Método de adición de estructuras de tiempo. Comprueba el desborde de tv_nsec para aumentar en consecuenci
+// la variable tv_sec
 void add_timespec (struct timespec *suma,
                    const struct timespec *sumando1,
                    const struct timespec *sumando2 )
@@ -50,10 +54,12 @@ void add_timespec (struct timespec *suma,
     }
 }
 
+// Metodo que transforma estructuras de tipo timespec a double y las resta.
 double get_TimeStamp (struct timespec inicio, struct timespec ahora){
     return (double)(ahora.tv_sec+ahora.tv_nsec*(1E-9)) - (double)(inicio.tv_sec+inicio.tv_nsec*(1E-9));
 }
 
+// Codigo del hilo de planta. Lee los datos, simula comportamiento utilizando esperas absolutas (TIMER_ABSTIME)
 void * planta (void * param){
     datosSistema* datos = (datosSistema *)param;
     Planta * p = (Planta*) datos->fdt;
@@ -63,13 +69,17 @@ void * planta (void * param){
     inicial = siguiente_activacion;
     while(running){
         double resultado = p->read();
-        double salida = p->simular(resultado);
+        p->simular(resultado);
         add_timespec(&siguiente_activacion, &siguiente_activacion, &periodo);
         clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME,&siguiente_activacion, NULL);
     }
     return 0;
 }
 
+/* Codigo del hilo del regulador, similar al de planta, adicionalmente comprueba el resultado de la conversion
+ * implicita en la función read y añade los datos a la tabla compartida con la interfaz, actuando como lanzador
+ * del plot en el objeto tipo Graf.
+*/
 void * regulador (void * param){
     datosSistema* datos = (datosSistema *)param;
     Regulador * p = (Regulador*) datos->fdt;
@@ -93,6 +103,7 @@ void * regulador (void * param){
 int main(int argc, char *argv[])
 {
 
+    // Declaracion de arrays de double que contienen numeradores y denominadores de funciones de transferencia
     double num1[] = {0,
                     0.002059,
                     0.001686
@@ -128,6 +139,7 @@ int main(int argc, char *argv[])
 
 
 
+    // Declaracion de objetos que participan en los lazos de control
     Conversor c = Conversor();
     Sensor s1 = Sensor(&yk1);
     Sensor s2 = Sensor(&yk2);
@@ -137,6 +149,7 @@ int main(int argc, char *argv[])
     Planta *p2 = new Planta(&uk2,&yk2,num2,den2,2);
     Regulador *r2 = new Regulador(&kp2,&ref2,&uk2,pid_num2,pid_den2,2,&c,&s2);
 
+    // Declaracion e inicializacion de las estructuras de datos para los hilos
     struct datosSistema planta1,regulador1,planta2,regulador2;
     planta1.fdt = p1;
     planta1.periodo.tv_sec=0;
@@ -155,24 +168,55 @@ int main(int argc, char *argv[])
     regulador2.periodo.tv_nsec=20000000;
     regulador2.numLazo = 1;
 
-    pthread_t pla1, reg1, pla2, reg2;		/* threads que se van a crear */
 
-    running = true;
+    running = true; // Se inicializa la variable global para los hilos previamente
 
-    pthread_create(&pla1, NULL, planta, (void*)&planta1);
-    pthread_create(&reg1, NULL, regulador, (void*)&regulador1);
-    pthread_create(&pla2, NULL, planta, (void*)&planta2);
-    pthread_create(&reg2, NULL, regulador, (void*)&regulador2);
 
-    //pthread_create(&pla2, NULL, planta, (void*)p2);
-    //pthread_create(&reg2, NULL, regulador, (void*)r2);
+    pthread_t pla1, reg1, pla2, reg2;		// Threads que se van a crear
+
+    // PLANIFICACION Y PRIORIDADES
+    // Sistema tipo FIFO con prioridades relativas entre los hilos.
+    // Se asignan en funcion de su periodo absoluto de ejecucion.
+    sched_param param_P1, param_R1, param_P2, param_R2;
+    pthread_attr_t propPla1,propPla2,propReg1,propReg2;
+
+    param_R1.__sched_priority = 1;
+    param_P1.__sched_priority = 2;
+    param_R2.__sched_priority = 3;
+    param_P2.__sched_priority = 4;
+
+    pthread_attr_init(&propPla1);
+    pthread_attr_setschedparam(&propPla1,&param_P1);
+    pthread_attr_setschedpolicy(&propPla1,SCHED_FIFO);
+
+    pthread_attr_init(&propPla2);
+    pthread_attr_setschedparam(&propPla2,&param_P2);
+    pthread_attr_setschedpolicy(&propPla2,SCHED_FIFO);
+
+    pthread_attr_init(&propReg1);
+    pthread_attr_setschedparam(&propReg1,&param_R1);
+    pthread_attr_setschedpolicy(&propReg1,SCHED_FIFO);
+
+    pthread_attr_init(&propReg2);
+    pthread_attr_setschedparam(&propReg2,&param_R2);
+    pthread_attr_setschedpolicy(&propReg2,SCHED_FIFO);
+
+    // Se lanzan los hilos
+    pthread_create(&pla1, &propPla1, planta, (void*)&planta1);
+    pthread_create(&reg1, &propReg1, regulador, (void*)&regulador1);
+    pthread_create(&pla2, &propPla2, planta, (void*)&planta2);
+    pthread_create(&reg2, &propReg2, regulador, (void*)&regulador2);
 
     QApplication a(argc, argv);
     GUI w;
 
+    // Se crean los objetos que gestionan las graficas de la interfaz
+    // Es necesario que el objeto GUI tenga accesible el atributo UI.
     Graf g1(0.001,w.ui->customPlot);
     Graf g2(0.001,w.ui->customPlot2);
 
+    // Conexion de las signals lanzadas por los objetos que contienen datos compartidos con interfaz
+    // y slots de los objetos GRAF.
     QObject::connect(&TablaSalidas1,SIGNAL(sendValue(double,double,double)),&g1,SLOT(dataSlot(double,double,double)));
     QObject::connect(&TablaSalidas2,SIGNAL(sendValue(double,double,double)),&g2,SLOT(dataSlot(double,double,double)));
     w.show();

@@ -1,9 +1,12 @@
 #include "graf.h"
 #include "qcustomplot.h"
 #include <stdlib.h>
-#include <iostream>
 
-using namespace std;
+/* Clase que gestiona los objetos de tipo QCustomPlot en los que se realiza un plot de los datos.
+ * Dispone de un slot encargado de recibir datos de un objeto VCompGrafica.
+ * Se ha introducido un metodo adaptativo que permita la usabilidad maxima posible de la interfaz
+ * en casos en los que la ejecucion de slots consuma demasiado tiempo de CPU.
+ */
 
 extern double get_TimeStamp (struct timespec inicio, struct timespec ahora);
 
@@ -66,7 +69,6 @@ void Graf:: dataSlot(double tiempo, double ref1, double y1)
 
         //Metodo adaptativo de actualizacion de graficas en funcion de uso de CPU
         //Permite que la interfaz siga siendo utilizable modificando el tiempo de refresco de las gráficas
-
 
         clock_gettime(CLOCK_REALTIME, &tiempoBucle);
         // Si el tiempo de procesado del slot es mayor al periodo de refresco, se aumenta este ultimo en 20%

@@ -18,7 +18,7 @@ void VCompGrafica::add(double UkValue, double YkValue, double tiempo, double ref
     }
     valuesYk[0] = YkValue;
     valuesUk[0] = UkValue;
-    emit sendValue(tiempo,ref1,YkValue);
+    emit sendValue(tiempo,ref1,YkValue); //Se lanza la signal para el objeto tipo Graf.
 }
 
 double* VCompGrafica::getTablaUk(){

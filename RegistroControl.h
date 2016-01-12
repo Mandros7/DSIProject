@@ -2,6 +2,7 @@
 #define RegistroControl_H
 
 typedef unsigned char uint8;
+
 typedef struct{
     uint8    Start:1,
                      :1,
