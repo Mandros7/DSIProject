@@ -38,10 +38,6 @@ int Regulador::read(double *resultado, int chan) {
 
     pthread_mutex_lock(&conv->mutex); //Obtenemos mutex para el recurso compartido (el registro de control)
 
-//    while(!conv->CSR.conversionAcabada()) {             //Si el conversor esta en uso
-//        pthread_cond_wait(&conv->cond,&conv->mutex);    //Espera condicionada para no utilizar tiempo de CPU
-//    }
-
     //Modificacion de valores en el CSR
     conv->CSR.prepararConversion(chan);
     conv->CSR.lanzarConversion();
@@ -51,7 +47,7 @@ int Regulador::read(double *resultado, int chan) {
     //indicaría el fin de la conversion con con una señal.
 
     //pthread_create(&conversion,null,(void*)conv->convert(),&param)
-    conv->convert(value);
+    conv->convert(value); //Conversion sin concurrencia. Se espera al fin de la operacion
 
     //se puede usar pthread_join en vez de una espera condicionada.
 
@@ -65,7 +61,6 @@ int Regulador::read(double *resultado, int chan) {
     }
 
     if (conv->CSR.error()){
-        //pthread_cond_signal(&conv->cond);
         pthread_mutex_unlock(&conv->mutex);
         return -1;
     }
@@ -74,7 +69,6 @@ int Regulador::read(double *resultado, int chan) {
 
     clock_nanosleep(CLOCK_REALTIME,TIMER_ABSTIME,&fin,NULL); //Espera hasta los 2ms
 
-    //pthread_cond_signal(&conv->cond);
     pthread_mutex_unlock(&conv->mutex);
 
     return 0;

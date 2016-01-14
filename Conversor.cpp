@@ -18,6 +18,5 @@ void Conversor::convert(short sensValor) {
 // Inicialización de variables en el constructor
 Conversor::Conversor() {
     pthread_mutex_init(&mutex, NULL);
-    //pthread_cond_init(&cond, NULL);
     pthread_cond_init(&convFinished, NULL);
 }
