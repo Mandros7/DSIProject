@@ -17,7 +17,7 @@ public:
     void setRegistroControl(double channel);
     void convert(short sensValor);
     pthread_mutex_t mutex;
-    pthread_cond_t cond;
+    //pthread_cond_t cond;
     pthread_cond_t convFinished;
     Conversor();
     RegistroControl CSR;

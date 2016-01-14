@@ -10,7 +10,7 @@ RegistroControl Conversor::getRegistroControl() {
 
 // Función de conversión que señaliza el fin mediante la variables de condición.
 void Conversor::convert(short sensValor) {
-    registroDatos = (double)(sensValor*1000.0/500.0/4095.0*10.0);
+    registroDatos = (double)(sensValor*1000.0/500.0/4095.0*20.0);
     CSR.acabarConversion();
     pthread_cond_signal(&convFinished);
 }
@@ -18,6 +18,6 @@ void Conversor::convert(short sensValor) {
 // Inicialización de variables en el constructor
 Conversor::Conversor() {
     pthread_mutex_init(&mutex, NULL);
-    pthread_cond_init(&cond, NULL);
+    //pthread_cond_init(&cond, NULL);
     pthread_cond_init(&convFinished, NULL);
 }

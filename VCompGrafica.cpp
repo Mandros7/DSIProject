@@ -9,6 +9,7 @@ VCompGrafica::VCompGrafica(QObject *parent,int tam) : QObject(parent)
         valuesYk[i]=0;
         valuesUk[i]=0;
     }
+
     pthread_mutexattr_t atributos;
     pthread_mutexattr_init(&atributos);
     pthread_mutexattr_setprotocol(&atributos,PTHREAD_PRIO_PROTECT);

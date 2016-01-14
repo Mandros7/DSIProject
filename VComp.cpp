@@ -23,7 +23,7 @@ double VComp::getValor() {
 }
 
 void VComp::setValor(double n_Valor) {
-
+    pthread_mutex_lock(&mutex);
     valor = n_Valor;
     pthread_mutex_unlock(&mutex);
 }

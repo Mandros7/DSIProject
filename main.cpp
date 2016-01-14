@@ -213,6 +213,7 @@ int main(int argc, char *argv[])
     pthread_create(&pla2, &propPla2, planta, (void*)&planta2);
     pthread_create(&reg2, &propReg2, regulador, (void*)&regulador2);
 
+
     QApplication a(argc, argv);
     GUI w;
 

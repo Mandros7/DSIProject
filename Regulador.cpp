@@ -38,28 +38,34 @@ int Regulador::read(double *resultado, int chan) {
 
     pthread_mutex_lock(&conv->mutex); //Obtenemos mutex para el recurso compartido (el registro de control)
 
-    while(!conv->CSR.conversionAcabada()) {             //Si el conversor esta en uso
-        pthread_cond_wait(&conv->cond,&conv->mutex);    //Espera condicionada para no utilizar tiempo de CPU
-    }
+//    while(!conv->CSR.conversionAcabada()) {             //Si el conversor esta en uso
+//        pthread_cond_wait(&conv->cond,&conv->mutex);    //Espera condicionada para no utilizar tiempo de CPU
+//    }
 
     //Modificacion de valores en el CSR
     conv->CSR.prepararConversion(chan);
     conv->CSR.lanzarConversion();
 
-    pthread_mutex_unlock(&conv->mutex);
+    //Conversión lanzada. Se preferiria una conversion como una operacion sincrona
+    //sin necesidad de hacer polling, el conversor (si fuese un hilo independiente)
+    //indicaría el fin de la conversion con con una señal.
 
-    //Conversión lanzada
+    //pthread_create(&conversion,null,(void*)conv->convert(),&param)
     conv->convert(value);
 
-    pthread_mutex_lock(&conv->mutex);
+    //se puede usar pthread_join en vez de una espera condicionada.
 
-    //Se espera al fin de la conversion
+    /*Se espera al fin de la conversion.
+    * Esta espera condicionada no es necesaria,
+    * solo representa una situacion real en la que el
+    * conversor es un objeto independiente (tal vez ejecutado en otro hilo)
+    */
     while(!conv->CSR.conversionAcabada()){
         pthread_cond_wait(&conv->convFinished,&conv->mutex);
     }
 
     if (conv->CSR.error()){
-        pthread_cond_signal(&conv->cond);
+        //pthread_cond_signal(&conv->cond);
         pthread_mutex_unlock(&conv->mutex);
         return -1;
     }
@@ -68,7 +74,7 @@ int Regulador::read(double *resultado, int chan) {
 
     clock_nanosleep(CLOCK_REALTIME,TIMER_ABSTIME,&fin,NULL); //Espera hasta los 2ms
 
-    pthread_cond_signal(&conv->cond);
+    //pthread_cond_signal(&conv->cond);
     pthread_mutex_unlock(&conv->mutex);
 
     return 0;

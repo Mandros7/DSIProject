@@ -10,7 +10,7 @@ short Sensor::getValue() {
     double valor = m_entrada->getValor();
     if (valor>20)
         valor = 20;
-    if (valor<0)
-        valor = 0;
-    return (short)(valor/1000.0*500.0*4095.0/10.0);
+    if (valor<-20)
+        valor = 20;
+    return (short)(valor/1000.0*500.0*4095.0/20.0);
 }
